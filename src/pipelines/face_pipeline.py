@@ -1,5 +1,3 @@
-
-
 import dlib
 import numpy as np
 import face_recognition_models
@@ -57,14 +55,20 @@ def get_trained_model():
     if len(X) ==0:
         return 0
     
+    # clf = SVC(kernel='linear', probability=True, class_weight='balanced')
+
+    # try:
+    #     clf.fit(X, y)
+    # except ValueError:
+    #     pass
+
+    # return {'clf': clf, 'X':X, "y":y}
+    if len(set(y)) < 2:
+        return {'clf': None, 'X': X, 'y': y}
+
     clf = SVC(kernel='linear', probability=True, class_weight='balanced')
-
-    try:
-        clf.fit(X, y)
-    except ValueError:
-        pass
-
-    return {'clf': clf, 'X':X, "y":y}
+    clf.fit(X, y)
+    return {'clf': clf, 'X': X, 'y': y}
 
 
 def train_classifier():
@@ -89,18 +93,31 @@ def predict_attendance(class_image_np):
 
     all_students = sorted(list(set(y_train)))
 
+    # for encoding in encodings:
+    #     if len(all_students)>= 2:
+    #         predicted_id= int(clf.predict([encoding])[0])
+    #     else:
+    #         predicted_id = int(all_students[0])
+
+    #     student_embedding = X_train[y_train.index(predicted_id)]
+
+    #     best_match_score = np.linalg.norm(student_embedding - encoding)
+
+    #     resemblance_threshold = 0.6
+
+    #     if best_match_score <= resemblance_threshold:
+    #         detected_student[predicted_id] = True
     for encoding in encodings:
-        if len(all_students)>= 2:
-            predicted_id= int(clf.predict([encoding])[0])
-        else:
-            predicted_id = int(all_students[0])
+    if clf is not None and len(all_students) >= 2:
+        predicted_id = int(clf.predict([encoding])[0])
+    else:
+        predicted_id = int(all_students[0])
 
-        student_embedding = X_train[y_train.index(predicted_id)]
+    indices = [i for i, label in enumerate(y_train) if label == predicted_id]
+    best_match_score = min(np.linalg.norm(X_train[i] - encoding) for i in indices)
 
-        best_match_score = np.linalg.norm(student_embedding - encoding)
+    resemblance_threshold = 0.6
 
-        resemblance_threshold = 0.6
-
-        if best_match_score <= resemblance_threshold:
-            detected_student[predicted_id] = True
+    if best_match_score <= resemblance_threshold:
+        detected_student[predicted_id] = True
     return detected_student, all_students, len(encodings)
