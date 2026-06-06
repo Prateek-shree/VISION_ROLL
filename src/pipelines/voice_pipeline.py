@@ -23,7 +23,7 @@ def get_voice_embedding(audio_bytes):
         return None
     
 
-def identify_speaker(new_embedding, candidates_dict, threshold=0.55):
+def identify_speaker(new_embedding, candidates_dict, threshold=0.4):
     if new_embedding is None or not candidates_dict:
         return None, 0.0
     
@@ -44,7 +44,7 @@ def identify_speaker(new_embedding, candidates_dict, threshold=0.55):
 
 
 
-def process_bulk_audio(audio_bytes, candidates_dict, threshold=0.55):
+def process_bulk_audio(audio_bytes, candidates_dict, threshold=0.4):
 
     try:
         encoder = load_voice_encoder()
@@ -57,7 +57,7 @@ def process_bulk_audio(audio_bytes, candidates_dict, threshold=0.55):
 
         for start, end in segments:
 
-            if (end-start) < sr * 0.5:
+            if (end-start) < sr * 0.3:
                 continue
             segment_audio = audio[start:end]
             wav = preprocess_wav(segment_audio)
