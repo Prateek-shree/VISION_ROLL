@@ -40,7 +40,7 @@ def voice_attendance_dialog(selected_subject_id):
             
             audio_bytes = audio_data.read()
 
-            detected_scores = process_bulk_audio(audio_bytes, candidates_dict)
+            detected_scores = process_bulk_audio(audio_bytes, candidates_dict, threshold=0.4)
 
             results, attendance_to_log  = [], []
 
